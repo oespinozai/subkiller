@@ -181,6 +181,7 @@
         <div class="nav-actions">
           <button id="exportBtn" class="btn ghost hidden" disabled title="Available after analysis">Export Results (CSV)</button>
           <a id="tutorialLink" class="btn ghost" href="tutorial.html">Tutorial</a>
+          <a id="faqLink" class="btn ghost" href="faq.html">FAQ</a>
           <a id="helpLink" class="btn ghost" href="#how-it-works">How it works</a>
           <a id="pricingLink" class="btn ghost" href="#pricing">Pricing</a>
           <button id="upgradeBtn" class="btn success">Upgrade to Pro</button>
@@ -188,6 +189,7 @@
       </div>
       <div id="mobileMenu" class="mobile-menu hidden" aria-label="Mobile menu">
         <a class="btn ghost" href="tutorial.html">Tutorial</a>
+        <a class="btn ghost" href="faq.html">FAQ</a>
         <a class="btn ghost" href="#how-it-works">How it works</a>
         <a class="btn ghost" href="#pricing">Pricing</a>
         <button class="btn success" id="upgradeBtnMobile">Upgrade to Pro</button>
@@ -526,22 +528,76 @@
     return rows.filter(r => r.some(x => x !== ""));
   }
 
-  // Heuristics keywords to boost confidence
-  const KEYWORDS = [
-    "subscription", "recurring", "netflix", "spotify", "amazon", "prime", "google", "apple", "icloud", 
-    "microsoft", "adobe", "notion", "canva", "dropbox", "zoom", "slack", "openai", "midjourney", "chatgpt", 
-    "patreon", "substack", "onlyfans", "xbox", "playstation", "steam", "github", "atlassian", "airtable", 
-    "loom", "figma", "tinder", "bumble",
-    // Grocery delivery & box services
-    "ocado", "hellofresh", "gousto", "mindfulchef", "simplycook", "riverford", "abel", "cole", "graze",
-    "marley", "spoon", "dishpatch", "feedme", "allplants", "plantbased", "veganized", "mindful", "chef",
-    "recipe", "meal", "box", "fresh", "organic", "weekly", "delivery", "subscription", "plan"
-  ];
+  // Enhanced subscription detection keywords with confidence weighting
+  const SUBSCRIPTION_PATTERNS = {
+    // High confidence indicators (0.3 boost)
+    streaming: ["netflix", "spotify", "amazon prime", "disney", "hulu", "youtube premium", "apple music", "paramount", "hbo", "peacock", "crunchyroll"],
+    software: ["adobe", "microsoft", "office365", "photoshop", "creative cloud", "dropbox", "notion", "canva", "figma", "github", "atlassian"],
+    gaming: ["xbox", "playstation", "nintendo", "steam", "epic games", "twitch", "discord nitro", "origin"],
+    
+    // Medium confidence indicators (0.2 boost)  
+    productivity: ["zoom", "slack", "airtable", "loom", "grammarly", "lastpass", "1password", "todoist", "evernote"],
+    fitness: ["peloton", "strava", "myfitnesspal", "headspace", "calm", "nike", "adidas", "fitbit premium"],
+    delivery: ["ocado", "hellofresh", "gousto", "mindfulchef", "simplycook", "riverford", "abel cole", "graze"],
+    
+    // Lower confidence but still relevant (0.1 boost)
+    dating: ["tinder", "bumble", "hinge", "match", "plenty of fish", "eharmony"],
+    news: ["times", "guardian", "telegraph", "economist", "financial times", "new york times"],
+    cloud: ["icloud", "onedrive", "google drive", "amazon s3", "backup"]
+  };
+
+  // Compile all keywords for quick lookup
+  const ALL_KEYWORDS = Object.values(SUBSCRIPTION_PATTERNS).flat();
+  
+  // Get confidence boost based on keyword category
+  function getKeywordBoost(merchant) {
+    const merchantLower = merchant.toLowerCase();
+    for (const [category, keywords] of Object.entries(SUBSCRIPTION_PATTERNS)) {
+      if (keywords.some(k => merchantLower.includes(k))) {
+        switch(category) {
+          case 'streaming':
+          case 'software': 
+          case 'gaming': return 0.3;
+          case 'productivity':
+          case 'fitness':
+          case 'delivery': return 0.2;
+          default: return 0.1;
+        }
+      }
+    }
+    // Check for generic subscription terms
+    if (/(subscription|recurring|monthly|annual|premium|plus|pro|plan)/.test(merchantLower)) {
+      return 0.15;
+    }
+    return 0;
+  }
 
   // State
   let files = [];
   let transactions = []; // normalized
   let results = [];
+  
+  // Machine learning-like feedback system
+  let userFeedback = JSON.parse(localStorage.getItem('subkiller_feedback') || '{}');
+  
+  function recordFeedback(merchant, action) {
+    if (!userFeedback[merchant]) {
+      userFeedback[merchant] = { keep: 0, cancel: 0 };
+    }
+    userFeedback[merchant][action]++;
+    localStorage.setItem('subkiller_feedback', JSON.stringify(userFeedback));
+  }
+  
+  function getFeedbackScore(merchant) {
+    const feedback = userFeedback[merchant];
+    if (!feedback) return 0;
+    
+    const total = feedback.keep + feedback.cancel;
+    if (total < 2) return 0; // Need at least 2 interactions
+    
+    // Score based on cancel ratio (higher = more likely subscription)
+    return (feedback.cancel / total) * 0.1;
+  }
 
   function guessColumns(header) {
     const lower = header.map(h => h.toLowerCase().trim());
@@ -601,21 +657,97 @@
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(t);
     }
-    // Merge very similar merchants (edit distance-like via substring)
+    
+    // Advanced merchant merging with fuzzy matching
     const keys = Array.from(map.keys());
-    for (let i=0;i<keys.length;i++){
-      for (let j=i+1;j<keys.length;j++){
+    const merged = new Set();
+    
+    for (let i = 0; i < keys.length; i++) {
+      if (merged.has(keys[i])) continue;
+      
+      for (let j = i + 1; j < keys.length; j++) {
+        if (merged.has(keys[j])) continue;
+        
         const a = keys[i], b = keys[j];
-        if (a==="unknown" || b==="unknown") continue;
-        if (a.length>=5 && b.includes(a) || b.length>=5 && a.includes(b)) {
-          // merge b into a
-          const arr = (map.get(a) || []).concat(map.get(b) || []);
-          map.set(a, arr);
-          map.delete(b);
+        if (a === "unknown" || b === "unknown") continue;
+        
+        // Enhanced similarity detection
+        if (shouldMergeMerchants(a, b)) {
+          // Merge b into a, keeping the more descriptive name
+          const arrA = map.get(a) || [];
+          const arrB = map.get(b) || [];
+          const combined = arrA.concat(arrB);
+          
+          // Use the name that appears more frequently or is more descriptive
+          const betterName = getBetterMerchantName(a, b, combined);
+          map.set(betterName, combined);
+          
+          if (betterName !== a) map.delete(a);
+          if (betterName !== b) map.delete(b);
+          
+          merged.add(keys[i]);
+          merged.add(keys[j]);
         }
       }
     }
+    
     return map;
+  }
+  
+  function shouldMergeMerchants(a, b) {
+    // Exact substring match
+    if (a.length >= 5 && b.includes(a) || b.length >= 5 && a.includes(b)) {
+      return true;
+    }
+    
+    // Common patterns for same service with different names
+    const patterns = [
+      // Payment processors
+      [/paypal.*(\w+)/, /\1/],
+      [/stripe.*(\w+)/, /\1/],
+      [/square.*(\w+)/, /\1/],
+      
+      // Company variations
+      [/(\w+)\s*(ltd|inc|llc|limited)/, /\1/],
+      [/(\w+)\s*subscription/, /\1/],
+      [/(\w+)\s*recurring/, /\1/],
+      
+      // Service variations
+      [/(\w+)\s*premium/, /\1/],
+      [/(\w+)\s*plus/, /\1/],
+      [/(\w+)\s*pro/, /\1/]
+    ];
+    
+    for (const [pattern, base] of patterns) {
+      const matchA = a.match(pattern);
+      const matchB = b.match(pattern);
+      if (matchA && matchB && matchA[1] === matchB[1]) {
+        return true;
+      }
+    }
+    
+    // Fuzzy string similarity (Jaccard similarity with word tokens)
+    const wordsA = new Set(a.split(/\s+/));
+    const wordsB = new Set(b.split(/\s+/));
+    const intersection = new Set([...wordsA].filter(x => wordsB.has(x)));
+    const union = new Set([...wordsA, ...wordsB]);
+    const similarity = intersection.size / union.size;
+    
+    return similarity >= 0.6; // 60% word overlap
+  }
+  
+  function getBetterMerchantName(a, b, transactions) {
+    // Prefer the name that appears in more recent transactions
+    const recentTx = transactions.sort((x, y) => y.date - x.date).slice(0, 3);
+    const aCount = recentTx.filter(tx => tx.normMerchant === a).length;
+    const bCount = recentTx.filter(tx => tx.normMerchant === b).length;
+    
+    if (aCount !== bCount) {
+      return aCount > bCount ? a : b;
+    }
+    
+    // Prefer longer, more descriptive names
+    return a.length > b.length ? a : b;
   }
 
   function detectRecurring(groups, settings) {
@@ -624,69 +756,49 @@
       const debits = txs.filter(t => t.direction === "debit").sort((a,b)=>a.date-b.date);
       if (debits.length < settings.minRepeats) continue;
 
-      // Filter out obvious non-subscriptions (but allow delivery services)
       const merchantLower = merchant.toLowerCase();
-      const nonSubscriptionMerchants = [
-        'chessington', 'thorpe park', 'alton towers', 'legoland',
-        'mcdonalds', 'kfc', 'burger king', 'starbucks', 'costa',
-        'parking', 'car park', 'petrol', 'shell', 'bp', 'esso',
-        'hospital', 'pharmacy', 'boots', 'superdrug',
-        'barbershop', 'barber', 'hairdresser', 'salon'
-      ];
       
-      // Allow regular grocery stores ONLY if they have subscription keywords
-      const groceryStores = ['sainsbury', 'tesco', 'asda', 'morrisons', 'waitrose', 'co-op'];
-      const hasSubscriptionKeywords = KEYWORDS.some(k => merchantLower.includes(k));
-      
-      if (nonSubscriptionMerchants.some(nm => merchantLower.includes(nm))) {
-        continue; // Skip obvious non-subscription merchants
-      }
-      
-      // Skip regular grocery stores unless they have subscription indicators
-      if (groceryStores.some(gs => merchantLower.includes(gs)) && !hasSubscriptionKeywords) {
+      // Enhanced false positive filtering
+      if (isLikelyFalsePositive(merchantLower, debits)) {
         continue;
       }
 
-      // compute intervals and amount stability
+      // Compute intervals with enhanced pattern detection
       const intervals = [];
-      for (let i=1;i<debits.length;i++) {
+      for (let i=1; i<debits.length; i++) {
         intervals.push(daysBetween(debits[i-1].date, debits[i].date));
       }
       if (!intervals.length) continue;
 
-      const avg = debits.reduce((s,t)=>s+t.absAmount,0)/debits.length;
-      const amountStd = Math.sqrt(debits.reduce((s,t)=>s+Math.pow(t.absAmount-avg,2),0)/debits.length);
-      const amountTol = (settings.amountTolerancePct/100) * avg;
-      const amountStable = amountStd <= amountTol;
+      // Enhanced amount analysis
+      const amounts = debits.map(t => t.absAmount);
+      const avg = amounts.reduce((s,a)=>s+a,0)/amounts.length;
+      const amountAnalysis = analyzeAmountPattern(amounts, avg);
+      
+      // Advanced interval pattern recognition
+      const intervalAnalysis = analyzeIntervalPattern(intervals, settings);
+      
+      // Skip if no clear pattern and low amount stability
+      if (!intervalAnalysis.frequency && !amountAnalysis.isStable && intervals.length < settings.minRepeats) {
+        continue;
+      }
 
-      // periodicity: check near 30 or 365 days with variance
-      const near = (target) => intervals.every(d => Math.abs(d-target) <= settings.maxVarianceDays);
-      const isMonthly = near(30) || near(31) || near(28);
-      const isAnnual = near(365) || near(366);
-
-      // If not strict every interval, try majority rule
-      const countNear = (target) => intervals.filter(d => Math.abs(d-target) <= settings.maxVarianceDays).length;
-      const monthlyMajority = countNear(30)+countNear(31)+countNear(28) >= Math.max(2, Math.ceil(intervals.length*0.6));
-      const annualMajority = countNear(365)+countNear(366) >= Math.max(1, Math.ceil(intervals.length*0.6));
-
-      const frequency = isMonthly || monthlyMajority ? "Monthly" : (isAnnual || annualMajority ? "Annual" : null);
-      if (!frequency && (!amountStable || intervals.length < settings.minRepeats-1)) continue;
-
-      // Filter out transactions that are too close together (same day attempts)
+      // Filter out same-day duplicates and very short intervals
       const minInterval = Math.min(...intervals);
-      if (minInterval < 1) continue; // Skip same-day multiple attempts
+      if (minInterval < 1) continue;
 
-      // confidence score with delivery service boost
-      const repeatsScore = Math.min(1, (debits.length-1) / 5);
-      const variancePenalty = Math.min(1, (settings.maxVarianceDays / 10));
-      const amountScore = amountStable ? 0.9 : 0.4;
-      const keywordBoost = KEYWORDS.some(k => merchantLower.includes(k)) ? 0.15 : 0;
-      
-      // Extra boost for known delivery/box services
-      const deliveryServices = ['ocado', 'hellofresh', 'gousto', 'mindfulchef', 'simplycook', 'riverford'];
-      const deliveryBoost = deliveryServices.some(ds => merchantLower.includes(ds)) ? 0.2 : 0;
-      
-      let confidence = Math.max(0, Math.min(1, 0.3*repeatsScore + 0.3*amountScore + 0.25*(frequency?1:0.5) + 0.15* (1-variancePenalty) + keywordBoost + deliveryBoost));
+      // Enhanced confidence scoring
+      const confidence = calculateAdvancedConfidence({
+        merchant: merchantLower,
+        debits,
+        intervals,
+        amountAnalysis,
+        intervalAnalysis,
+        settings
+      });
+
+      // Only include results with reasonable confidence
+      if (confidence < 0.15) continue;
 
       out.push({
         merchant,
@@ -694,19 +806,233 @@
         count: debits.length,
         avgAmount: avg,
         currency: debits[0]?.currency || "USD",
-        frequency: frequency || "Potential",
+        frequency: intervalAnalysis.frequency || "Potential",
         confidence,
-        examples: debits.slice(-3), // last 3 examples
+        examples: debits.slice(-3),
+        pattern: intervalAnalysis.pattern,
+        amountTrend: amountAnalysis.trend
       });
     }
-    // sort by confidence then amount desc
-    out.sort((a,b) => b.confidence - a.confidence || b.avgAmount - a.avgAmount);
+    
+    // Sort by confidence, then by frequency priority, then by amount
+    out.sort((a,b) => {
+      if (Math.abs(a.confidence - b.confidence) > 0.05) return b.confidence - a.confidence;
+      const freqScore = (f) => f === "Monthly" ? 3 : f === "Annual" ? 2 : f === "Weekly" ? 1 : 0;
+      return freqScore(b.frequency) - freqScore(a.frequency) || b.avgAmount - a.avgAmount;
+    });
+    
     return out;
+  }
+
+  // Enhanced false positive detection
+  function isLikelyFalsePositive(merchantLower, debits) {
+    // Obvious non-subscription merchants
+    const nonSubscriptionPatterns = [
+      /^(chessington|thorpe park|alton towers|legoland|theme park)/,
+      /^(mcdonalds|kfc|burger king|starbucks|costa|pret|subway)/,
+      /^(parking|car park|ncp|apcoa|meter|pay.*display)/,
+      /^(petrol|shell|bp|esso|texaco|sainsbury.*fuel|tesco.*fuel)/,
+      /^(hospital|nhs|pharmacy|boots|superdrug|chemist)/,
+      /^(barber|salon|hairdresser|beauty|spa|nails)/,
+      /^(train|tube|bus|tfl|rail|station|transport)/,
+      /^(cash.*withdraw|atm|cashback)/,
+      /^(transfer|standing order|direct debit|faster payment)/,
+      /^(refund|return|credit|reversal)/
+    ];
+    
+    if (nonSubscriptionPatterns.some(pattern => pattern.test(merchantLower))) {
+      return true;
+    }
+    
+    // Grocery stores without subscription indicators
+    const groceryStores = ['sainsbury', 'tesco', 'asda', 'morrisons', 'waitrose', 'co-op', 'iceland', 'lidl', 'aldi'];
+    const hasSubscriptionIndicators = getKeywordBoost(merchantLower) > 0;
+    if (groceryStores.some(store => merchantLower.includes(store)) && !hasSubscriptionIndicators) {
+      return true;
+    }
+    
+    // Utilities and bills (only if amounts vary significantly)
+    const utilityPatterns = ['electric', 'gas', 'water', 'council tax', 'rent', 'mortgage', 'insurance'];
+    if (utilityPatterns.some(util => merchantLower.includes(util))) {
+      const amounts = debits.map(d => d.absAmount);
+      const coefficientOfVariation = standardDeviation(amounts) / mean(amounts);
+      return coefficientOfVariation > 0.3; // High variation suggests irregular billing
+    }
+    
+    return false;
+  }
+
+  // Analyze amount patterns for trends and stability
+  function analyzeAmountPattern(amounts, avg) {
+    const n = amounts.length;
+    if (n < 2) return { isStable: true, trend: 'stable' };
+    
+    const stdDev = standardDeviation(amounts);
+    const coefficientOfVariation = stdDev / avg;
+    
+    // Check for trend (increasing/decreasing prices)
+    let trend = 'stable';
+    if (n >= 3) {
+      const firstHalf = amounts.slice(0, Math.floor(n/2));
+      const secondHalf = amounts.slice(Math.ceil(n/2));
+      const firstAvg = mean(firstHalf);
+      const secondAvg = mean(secondHalf);
+      const changePercent = (secondAvg - firstAvg) / firstAvg;
+      
+      if (changePercent > 0.1) trend = 'increasing';
+      else if (changePercent < -0.1) trend = 'decreasing';
+    }
+    
+    return {
+      isStable: coefficientOfVariation <= 0.15, // More generous than before
+      coefficientOfVariation,
+      trend,
+      hasOutliers: amounts.some(a => Math.abs(a - avg) > 2 * stdDev)
+    };
+  }
+
+  // Advanced interval pattern analysis
+  function analyzeIntervalPattern(intervals, settings) {
+    if (!intervals.length) return { frequency: null, pattern: 'none' };
+    
+    const patterns = [
+      { name: 'Weekly', targets: [7, 14], tolerance: 2 },
+      { name: 'Monthly', targets: [28, 29, 30, 31], tolerance: settings.maxVarianceDays },
+      { name: 'Quarterly', targets: [90, 91, 92], tolerance: 7 },
+      { name: 'Semi-Annual', targets: [180, 182, 183], tolerance: 10 },
+      { name: 'Annual', targets: [365, 366], tolerance: 14 }
+    ];
+    
+    for (const pattern of patterns) {
+      const matches = intervals.filter(interval => 
+        pattern.targets.some(target => Math.abs(interval - target) <= pattern.tolerance)
+      );
+      
+      const matchRatio = matches.length / intervals.length;
+      
+      // Require majority match for clear patterns
+      if (matchRatio >= 0.7) {
+        return { 
+          frequency: pattern.name, 
+          pattern: 'regular',
+          matchRatio,
+          avgInterval: mean(matches)
+        };
+      }
+      
+      // Handle patterns with trial periods (e.g., 7 days then monthly)
+      if (pattern.name === 'Monthly' && intervals.length >= 2) {
+        const hasTrialPattern = intervals[0] <= 14 && 
+          intervals.slice(1).every(i => pattern.targets.some(t => Math.abs(i - t) <= pattern.tolerance));
+        if (hasTrialPattern) {
+          return { 
+            frequency: 'Monthly', 
+            pattern: 'trial-then-regular',
+            matchRatio: (intervals.length - 1) / intervals.length
+          };
+        }
+      }
+    }
+    
+    return { frequency: null, pattern: 'irregular' };
+  }
+
+  // Advanced confidence calculation
+  function calculateAdvancedConfidence({ merchant, debits, intervals, amountAnalysis, intervalAnalysis, settings }) {
+    let confidence = 0;
+    
+    // Base score from repetition frequency (0-0.25)
+    const repetitionScore = Math.min(0.25, debits.length * 0.05);
+    confidence += repetitionScore;
+    
+    // Amount stability score (0-0.25)
+    if (amountAnalysis.isStable) {
+      confidence += 0.25;
+    } else if (amountAnalysis.coefficientOfVariation <= 0.3) {
+      confidence += 0.15; // Somewhat stable
+    } else {
+      confidence += 0.05; // Unstable but possible subscription with price changes
+    }
+    
+    // Interval pattern score (0-0.3)
+    if (intervalAnalysis.frequency) {
+      const patternScore = intervalAnalysis.matchRatio * 0.3;
+      confidence += patternScore;
+      
+      // Bonus for common subscription frequencies
+      if (['Monthly', 'Annual'].includes(intervalAnalysis.frequency)) {
+        confidence += 0.05;
+      }
+    }
+    
+    // Keyword/merchant recognition (0-0.3)
+    const keywordBoost = getKeywordBoost(merchant);
+    confidence += keywordBoost;
+    
+    // User feedback learning (0-0.1)
+    const feedbackScore = getFeedbackScore(merchant);
+    confidence += feedbackScore;
+    
+    // Behavioral indicators (0-0.1)
+    const behaviorScore = analyzeBehavioralIndicators(debits);
+    confidence += behaviorScore;
+    
+    // Penalty for very irregular patterns
+    if (intervalAnalysis.pattern === 'irregular' && !amountAnalysis.isStable) {
+      confidence *= 0.7;
+    }
+    
+    // Bonus for amount trends that suggest subscription evolution
+    if (amountAnalysis.trend === 'increasing' && intervalAnalysis.frequency) {
+      confidence += 0.05; // Price increases over time suggest active subscription
+    }
+    
+    return Math.max(0, Math.min(1, confidence));
+  }
+
+  // Analyze behavioral patterns
+  function analyzeBehavioralIndicators(debits) {
+    let score = 0;
+    
+    // Consistent day of month for monthly charges
+    if (debits.length >= 3) {
+      const days = debits.map(d => d.date.getDate());
+      const dayStdDev = standardDeviation(days);
+      if (dayStdDev <= 3) score += 0.03; // Charges on similar day of month
+    }
+    
+    // Consistent time patterns (if timestamp available)
+    const hours = debits.map(d => d.date.getHours()).filter(h => h !== 0);
+    if (hours.length >= debits.length * 0.5) {
+      const hourStdDev = standardDeviation(hours);
+      if (hourStdDev <= 2) score += 0.02; // Charges at similar time
+    }
+    
+    // Weekday vs weekend pattern
+    const weekdays = debits.filter(d => d.date.getDay() >= 1 && d.date.getDay() <= 5).length;
+    const weekdayRatio = weekdays / debits.length;
+    if (weekdayRatio >= 0.8) score += 0.02; // Most charges on weekdays
+    
+    return score;
+  }
+
+  // Helper functions
+  function mean(arr) {
+    return arr.length ? arr.reduce((s, a) => s + a, 0) / arr.length : 0;
+  }
+
+  function standardDeviation(arr) {
+    const avg = mean(arr);
+    const squaredDiffs = arr.map(a => Math.pow(a - avg, 2));
+    return Math.sqrt(mean(squaredDiffs));
   }
 
   function frequencyPill(fq) {
     if (fq === "Monthly") return "<span class='pill recurring'>Monthly</span>";
     if (fq === "Annual") return "<span class='pill recurring'>Annual</span>";
+    if (fq === "Weekly") return "<span class='pill recurring'>Weekly</span>";
+    if (fq === "Quarterly") return "<span class='pill recurring'>Quarterly</span>";
+    if (fq === "Semi-Annual") return "<span class='pill recurring'>Semi-Annual</span>";
     return "<span class='pill potential'>Needs Review</span>";
   }
 
@@ -1076,6 +1402,7 @@ Generated locally by Subscription Killer.
     if (!btn) return;
     if (btn.classList.contains("btn-cancel")) {
       const merchant = decodeURIComponent(btn.getAttribute("data-merchant"));
+      recordFeedback(merchant, 'cancel'); // Learn from user action
       const txt = buildChecklist(merchant);
       const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
       const a = document.createElement("a");
@@ -1083,8 +1410,12 @@ Generated locally by Subscription Killer.
       a.download = `cancel-${merchant.replace(/\s+/g,"-")}.txt`;
       a.click();
       URL.revokeObjectURL(a.href);
+      btn.textContent = "Canceling...";
+      btn.disabled = true;
     }
     if (btn.classList.contains("btn-keep")) {
+      const merchant = decodeURIComponent(btn.getAttribute("data-merchant"));
+      recordFeedback(merchant, 'keep'); // Learn from user action
       btn.textContent = "Kept ✓";
       btn.disabled = true;
     }
