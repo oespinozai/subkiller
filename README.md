@@ -5,7 +5,7 @@
 A privacy-first web application that analyzes your bank statements to detect forgotten recurring charges. All processing happens client-side in your browser - your financial data never leaves your device.
 
 [![Live Demo](https://img.shields.io/badge/🚀-Live%20Demo-brightgreen)](https://subkiller.alvento.app)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 [![Privacy First](https://img.shields.io/badge/🔒-Privacy%20First-orange)](https://subkiller.alvento.app/privacy.html)
 
 ## 🚨 The Problem
@@ -172,19 +172,24 @@ Based on beta user feedback:
 - **Processing Time**: 2-5 minutes for complete analysis
 - **Accuracy Rate**: 95%+ for genuine subscription detection
 
-## 🤝 Contributing
+## 🚫 License & Usage
 
-We welcome contributions! Please see our [contributing guidelines](CONTRIBUTING.md).
+This is proprietary software owned by Alvento Ltd. 
 
-### Areas for Improvement
-- Bank-specific format parsers
-- Additional subscription service recognition
-- Enhanced mobile experience
-- Internationalization (non-UK banks)
+### Restrictions
+- ❌ No forking or redistribution
+- ❌ No commercial use without permission
+- ❌ No derivative works
+- ✅ Educational viewing only
+
+### Official Use
+- Use the tool at: [subkiller.alvento.app](https://subkiller.alvento.app)
+- Report issues through GitHub Issues
+- Contact legal@alvento.com for licensing
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is proprietary software owned by Alvento Ltd - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
