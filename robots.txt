@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://subkiller.alvento.app/sitemap.xml
+
+# Block common bot paths
+Disallow: /admin/
+Disallow: /_/
+Disallow: /api/
+
+# Allow important files
+Allow: /tutorial.html
+Allow: /about.html
+Allow: /privacy.html
+Allow: /terms.html

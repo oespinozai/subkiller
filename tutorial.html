@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Use SubKiller - Complete Tutorial Guide | Find Hidden Subscriptions</title>
+  <meta name="description" content="Step-by-step tutorial on using SubKiller to find hidden subscriptions. Learn how to download bank data, analyze statements, and cancel unwanted recurring charges.">
+  <link rel="canonical" href="https://subkiller.alvento.app/tutorial.html">
+  <meta property="og:title" content="SubKiller Tutorial - Find Hidden Subscriptions">
+  <meta property="og:description" content="Complete guide to finding and canceling hidden subscriptions using bank statement analysis.">
+  <meta property="og:url" content="https://subkiller.alvento.app/tutorial.html">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3068263471463445" crossorigin="anonymous"></script>
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RS59F57TXN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-RS59F57TXN');
+  </script>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #0e172a;
+      --muted: #aab3c5;
+      --text: #e8edf7;
+      --accent: #7c9cff;
+      --accent-2: #30d158;
+      --warning: #ffd166;
+      --border: #1a2543;
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height: 1.6; }
+    .container { max-width: 900px; margin: 0 auto; padding: 24px 20px; }
+    @media (max-width: 768px) {
+      .container { padding: 16px 12px; }
+      .card { padding: 16px; }
+      h1 { font-size: 24px; }
+      h2 { font-size: 20px; }
+      h3 { font-size: 16px; }
+    }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+    h1 { margin: 0 0 16px; font-size: 28px; color: var(--accent); }
+    h2 { color: var(--accent); margin: 32px 0 16px; font-size: 22px; }
+    h3 { color: var(--accent-2); margin: 24px 0 12px; font-size: 18px; }
+    p { margin: 0 0 16px; color: var(--muted); }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .highlight { background: rgba(124,156,255,0.1); padding: 2px 6px; border-radius: 4px; }
+    .warning { background: rgba(255,209,102,0.1); border: 1px solid rgba(255,209,102,0.3); border-radius: var(--radius); padding: 16px; margin: 16px 0; }
+    .success { background: rgba(48,209,88,0.1); border: 1px solid rgba(48,209,88,0.3); border-radius: var(--radius); padding: 16px; margin: 16px 0; }
+    .step { background: rgba(124,156,255,0.05); border-left: 4px solid var(--accent); padding: 20px; margin: 20px 0; border-radius: 0 var(--radius) var(--radius) 0; }
+    @media (max-width: 768px) {
+      .step { padding: 16px; margin: 16px 0; }
+      .step-number { width: 28px; height: 28px; font-size: 14px; }
+    }
+    .step-number { background: var(--accent); color: #0b1220; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; margin-right: 12px; }
+    .file-examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin: 20px 0; }
+    @media (max-width: 768px) {
+      .file-examples { grid-template-columns: 1fr; gap: 12px; }
+    }
+    .file-example { background: rgba(48,209,88,0.05); border: 1px solid rgba(48,209,88,0.2); border-radius: var(--radius); padding: 16px; }
+    .file-example h4 { color: var(--accent-2); margin: 0 0 8px; font-size: 16px; }
+    .code-block { background: #000; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin: 16px 0; font-family: monospace; font-size: 14px; overflow-x: auto; }
+    ul { margin: 0 0 16px; color: var(--muted); }
+    li { margin: 4px 0; }
+    .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius: 8px; border:1px solid var(--accent); background: transparent; color:var(--accent); text-decoration: none; font-weight: 600; }
+    .btn:hover { background: rgba(124,156,255,0.1); }
+    .toc { background: rgba(124,156,255,0.05); border: 1px solid rgba(124,156,255,0.2); border-radius: var(--radius); padding: 20px; margin: 20px 0; }
+    .toc h3 { margin-top: 0; }
+    .toc ul { margin: 0; }
+    .toc a { color: var(--muted); font-size: 14px; }
+    .toc a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🎯 How to Use SubKiller</h1>
+      <p style="font-size: 18px; color: var(--accent-2);">Complete step-by-step guide to finding and canceling your hidden subscriptions</p>
+      
+      <div class="toc">
+        <h3>📋 Tutorial Contents</h3>
+        <ul>
+          <li><a href="#getting-started">Getting Started</a></li>
+          <li><a href="#downloading-data">Step 1: Download Your Bank Data</a></li>
+          <li><a href="#uploading-files">Step 2: Upload Files to SubKiller</a></li>
+          <li><a href="#analyzing-results">Step 3: Analyze Your Results</a></li>
+          <li><a href="#canceling-subscriptions">Step 4: Cancel Unwanted Subscriptions</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+          <li><a href="#maximizing-savings">Maximizing Your Savings</a></li>
+        </ul>
+      </div>
+
+      <div class="warning">
+        <strong>🔒 Privacy First:</strong> All processing happens in your browser. Your bank data never leaves your device or gets sent to our servers. You're in complete control of your financial information.
+      </div>
+    </div>
+
+    <div class="card" id="getting-started">
+      <h2>🚀 Getting Started</h2>
+      <p>SubKiller analyzes your bank statements to automatically detect recurring subscription charges. Here's what you'll need:</p>
+      
+      <h3>What You Need:</h3>
+      <ul>
+        <li><strong>Bank Statements:</strong> Last 6-12 months of transaction data</li>
+        <li><strong>File Formats:</strong> CSV, Excel (.xlsx/.xls), or PDF statements</li>
+        <li><strong>Multiple Sources:</strong> You can combine different banks, PayPal, credit cards</li>
+        <li><strong>5 Minutes:</strong> The entire process takes just a few minutes</li>
+      </ul>
+
+      <div class="success">
+        <strong>💡 Pro Tip:</strong> The more data you provide (longer time period, multiple accounts), the more accurate the detection will be!
+      </div>
+    </div>
+
+    <div class="card" id="downloading-data">
+      <h2>📥 Step 1: Download Your Bank Data</h2>
+      
+      <div class="step">
+        <span class="step-number">1</span>
+        <div>
+          <h3>Log into Your Online Banking</h3>
+          <p>Access your bank's website or mobile app and navigate to your transaction history or statements section.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">2</span>
+        <div>
+          <h3>Export Your Transactions</h3>
+          <p>Look for options like "Export", "Download", or "Export to CSV/Excel". Choose a date range of at least 6 months for best results.</p>
+        </div>
+      </div>
+
+      <div class="file-examples">
+        <div class="file-example">
+          <h4>🏦 Most UK Banks</h4>
+          <p>Barclays, HSBC, Lloyds, NatWest</p>
+          <ul>
+            <li>CSV download available</li>
+            <li>Usually in Statements section</li>
+            <li>Date range selection</li>
+          </ul>
+        </div>
+        <div class="file-example">
+          <h4>💳 PayPal</h4>
+          <p>PayPal Activity Export</p>
+          <ul>
+            <li>Activity → Statements</li>
+            <li>Download CSV format</li>
+            <li>Great for online subscriptions</li>
+          </ul>
+        </div>
+        <div class="file-example">
+          <h4>💳 Credit Cards</h4>
+          <p>Amex, Visa, Mastercard</p>
+          <ul>
+            <li>Monthly statement PDFs</li>
+            <li>CSV export if available</li>
+            <li>Catches subscription charges</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="warning">
+        <strong>⚠️ Common File Formats:</strong>
+        <ul>
+          <li><strong>CSV:</strong> Most common and works best</li>
+          <li><strong>Excel:</strong> .xlsx and .xls files supported</li>
+          <li><strong>PDF:</strong> We'll extract transaction data automatically</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" id="uploading-files">
+      <h2>📤 Step 2: Upload Files to SubKiller</h2>
+      
+      <div class="step">
+        <span class="step-number">1</span>
+        <div>
+          <h3>Go to SubKiller</h3>
+          <p>Visit <a href="index.html">SubKiller</a> and you'll see the file upload area in the center of the page.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">2</span>
+        <div>
+          <h3>Upload Your Files</h3>
+          <p>Either drag and drop your files onto the upload area, or click "Browse Files" to select them. You can upload multiple files at once!</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">3</span>
+        <div>
+          <h3>Check the File Summary</h3>
+          <p>You'll see a summary showing:</p>
+          <ul>
+            <li><strong>Files:</strong> Number of files uploaded</li>
+            <li><strong>Transactions:</strong> Total transactions found</li>
+            <li><strong>Recurring:</strong> Will show after analysis</li>
+            <li><strong>Monthly Spend:</strong> Will show after analysis</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="success">
+        <strong>✅ Multiple File Types:</strong> You can mix and match CSV, Excel, and PDF files in the same analysis. SubKiller will automatically merge and deduplicate similar merchants across all your accounts.
+      </div>
+    </div>
+
+    <div class="card" id="analyzing-results">
+      <h2>🔍 Step 3: Analyze Your Results</h2>
+      
+      <div class="step">
+        <span class="step-number">1</span>
+        <div>
+          <h3>Adjust Detection Settings (Optional)</h3>
+          <p>In the "Detection Settings" panel, you can fine-tune:</p>
+          <ul>
+            <li><strong>Min repeats:</strong> How many times a charge must repeat (default: 2)</li>
+            <li><strong>Max variance:</strong> Days of flexibility for "monthly" charges (default: 4)</li>
+            <li><strong>Amount tolerance:</strong> Percentage variation allowed in amounts (default: 5%)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">2</span>
+        <div>
+          <h3>Click "Analyze"</h3>
+          <p>Hit the blue "Analyze" button and SubKiller will process your data using advanced algorithms to detect recurring patterns.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">3</span>
+        <div>
+          <h3>Review Your Results</h3>
+          <p>You'll see a table with detected subscriptions showing:</p>
+          <ul>
+            <li><strong>Merchant:</strong> The company charging you</li>
+            <li><strong>Pattern:</strong> Recent charge dates and amounts</li>
+            <li><strong>Avg Amount:</strong> Average charge amount</li>
+            <li><strong>Frequency:</strong> Monthly, Annual, or "Needs Review"</li>
+            <li><strong>Confidence:</strong> How sure we are this is a subscription (0-100%)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="warning">
+        <strong>📊 Understanding Confidence Scores:</strong>
+        <ul>
+          <li><strong>80-100%:</strong> Very likely a subscription - investigate immediately</li>
+          <li><strong>60-79%:</strong> Probably a subscription - worth checking</li>
+          <li><strong>40-59%:</strong> Possible subscription - review the pattern</li>
+          <li><strong>Below 40%:</strong> Unlikely to be a subscription</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" id="canceling-subscriptions">
+      <h2>✂️ Step 4: Cancel Unwanted Subscriptions</h2>
+      
+      <div class="step">
+        <span class="step-number">1</span>
+        <div>
+          <h3>Review Each Subscription</h3>
+          <p>Go through your detected subscriptions and decide:</p>
+          <ul>
+            <li><strong>Keep:</strong> Click "Mark as Keep" for subscriptions you want</li>
+            <li><strong>Cancel:</strong> Click "Cancel Steps" for unwanted subscriptions</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">2</span>
+        <div>
+          <h3>Get Cancellation Instructions</h3>
+          <p>For each subscription you want to cancel, SubKiller provides:</p>
+          <ul>
+            <li><strong>Portal Links:</strong> Direct links to cancellation pages</li>
+            <li><strong>Email Templates:</strong> Pre-written cancellation emails</li>
+            <li><strong>Phone Numbers:</strong> Customer service contacts</li>
+            <li><strong>Step-by-step Guide:</strong> Detailed cancellation instructions</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">3</span>
+        <div>
+          <h3>Take Action Immediately</h3>
+          <p>Don't delay! Many subscriptions have specific cancellation windows. Follow the provided steps right away to avoid future charges.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-number">4</span>
+        <div>
+          <h3>Keep Records</h3>
+          <p>Save confirmation emails and take screenshots of cancellation confirmations. This protects you if charges continue.</p>
+        </div>
+      </div>
+
+      <div class="success">
+        <strong>💰 Pro Feature:</strong> Upgrade to Pro for unlimited results, PDF cancellation checklists, and direct vendor links. The Pro features often pay for themselves with just one canceled subscription!
+      </div>
+    </div>
+
+    <div class="card" id="troubleshooting">
+      <h2>🔧 Troubleshooting</h2>
+      
+      <h3>❌ "No results found"</h3>
+      <ul>
+        <li>Try lowering "Min repeats" to 2</li>
+        <li>Increase "Max variance" to 7 days</li>
+        <li>Make sure you have at least 3-6 months of data</li>
+        <li>Check that your file contains debit/outgoing transactions</li>
+      </ul>
+
+      <h3>📄 File won't upload</h3>
+      <ul>
+        <li>Supported formats: CSV, XLSX, XLS, PDF only</li>
+        <li>File size limit: 50MB per file</li>
+        <li>Try saving Excel files as CSV if having issues</li>
+      </ul>
+
+      <h3>🔍 Missing obvious subscriptions</h3>
+      <ul>
+        <li>Some subscriptions have irregular timing (e.g., yearly with trial periods)</li>
+        <li>Check the "Potential" category - these need manual review</li>
+        <li>Very new subscriptions (less than 2 charges) won't be detected</li>
+      </ul>
+
+      <h3>💳 Wrong amounts detected</h3>
+      <ul>
+        <li>Some services change prices over time</li>
+        <li>Currency conversion can cause amount variations</li>
+        <li>Look at the "Pattern" column to see actual charge amounts</li>
+      </ul>
+    </div>
+
+    <div class="card" id="maximizing-savings">
+      <h2>💰 Maximizing Your Savings</h2>
+      
+      <h3>🎯 Beyond Just Canceling</h3>
+      <ul>
+        <li><strong>Negotiate:</strong> Contact services to request discounts before canceling</li>
+        <li><strong>Downgrade:</strong> Switch to cheaper plans instead of canceling entirely</li>
+        <li><strong>Annual Savings:</strong> Some services are cheaper when paid annually</li>
+        <li><strong>Family Plans:</strong> Combine with family/friends for better rates</li>
+      </ul>
+
+      <h3>🔄 Regular Monitoring</h3>
+      <ul>
+        <li><strong>Monthly Reviews:</strong> Run SubKiller monthly to catch new subscriptions</li>
+        <li><strong>Set Alerts:</strong> Monitor your bank statements for new recurring charges</li>
+        <li><strong>Trial Tracking:</strong> Keep a list of free trials and their end dates</li>
+      </ul>
+
+      <h3>📊 Track Your Success</h3>
+      <ul>
+        <li><strong>Calculate Savings:</strong> Add up monthly amounts of canceled subscriptions</li>
+        <li><strong>Annual Impact:</strong> Multiply by 12 to see yearly savings</li>
+        <li><strong>Reinvest Wisely:</strong> Put savings into high-yield accounts or investments</li>
+      </ul>
+
+      <div class="success">
+        <strong>🎉 Average SubKiller User Saves:</strong>
+        <ul>
+          <li><strong>£180-£400</strong> per year in canceled subscriptions</li>
+          <li><strong>3-7 forgotten</strong> subscriptions discovered</li>
+          <li><strong>5 minutes</strong> to potentially save hundreds of pounds</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🚀 Ready to Start Saving?</h2>
+      <p>Now that you know how to use SubKiller effectively, it's time to take control of your subscriptions and start saving money!</p>
+      
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="index.html" class="btn" style="font-size: 18px; padding: 16px 32px;">Start Using SubKiller</a>
+      </div>
+      
+      <p style="text-align: center; margin-top: 32px;">
+        <a href="index.html">← Back to SubKiller</a> | 
+        <a href="privacy.html">Privacy Policy</a> | 
+        <a href="terms.html">Terms of Service</a> |
+        <a href="about.html">About</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="google-site-verification" content="vhLcM1P0ap8olTRmkzM2FAsPYrJwgNsijo5bGXgpMN0" />
+  <title>SubKiller - Find & Cancel Hidden Subscriptions | Free Bank Statement Analyzer</title>
+  <meta name="description" content="Discover hidden recurring charges in your bank statements. Upload CSV/Excel files and automatically detect subscriptions you forgot about. Save £100s per year with our free subscription killer tool.">
+  <meta name="keywords" content="subscription killer, cancel subscriptions, recurring charges, bank statement analyzer, hidden subscriptions, money saving tool">
+  <link rel="canonical" href="https://subkiller.alvento.app/">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://subkiller.alvento.app/">
+  <meta property="og:title" content="SubKiller - Find & Cancel Hidden Subscriptions">
+  <meta property="og:description" content="Discover hidden recurring charges in your bank statements. Save £100s per year by finding forgotten subscriptions.">
+  <meta property="og:image" content="https://subkiller.alvento.app/og-image.jpg">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://subkiller.alvento.app/">
+  <meta property="twitter:title" content="SubKiller - Find & Cancel Hidden Subscriptions">
+  <meta property="twitter:description" content="Discover hidden recurring charges in your bank statements. Save £100s per year by finding forgotten subscriptions.">
+  <meta property="twitter:image" content="https://subkiller.alvento.app/og-image.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3068263471463445" crossorigin="anonymous"></script>
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RS59F57TXN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-RS59F57TXN');
+  </script>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #0e172a;
+      --muted: #aab3c5;
+      --text: #e8edf7;
+      --accent: #7c9cff;   /* primary accent retained */
+      --accent-2: #30d158; /* secondary accent retained */
+      --danger: #ff6b6b;
+      --warning: #ffd166;
+      --chip: #0f1426;
+      --chip-border: #223055;
+      --border: #1a2543;
+      --shadow: none; /* remove heavy shadows for minimal look */
+      --radius: 8px;  /* tighter radius */
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    a { color: var(--accent); text-decoration: none; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px 32px; }
+    @media (max-width: 768px) {
+      .container { padding: 16px 12px 24px; }
+    }
+    header { display:flex; align-items:center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+    @media (max-width: 768px) {
+      header { flex-direction: column; align-items: stretch; gap: 16px; }
+    }
+    .brand { display:flex; flex-direction: column; align-items:center; gap:8px; font-weight:800; letter-spacing: 0.2px; text-align: center; }
+    @media (min-width: 769px) {
+      .brand { gap: 12px; }
+    }
+    .badge { font-size:12px; padding: 3px 8px; background: transparent; border: 1px solid var(--chip-border); border-radius: 999px; color: var(--muted); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
+    .grid { display:grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 900px) { .grid { grid-template-columns: 1.2fr 1fr; } }
+    @media (max-width: 768px) {
+      .grid { gap: 12px; }
+      .card { padding: 16px; }
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; line-height: 1.2; }
+    p.lead { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .uploader { border: 1px dashed var(--chip-border); background: transparent; padding: 18px; border-radius: var(--radius); text-align: center; }
+    .btn { display:inline-flex; align-items:center; gap:8px; padding:9px 14px; border-radius: 8px; border:1px solid var(--border); background: transparent; color:var(--text); cursor:pointer; transition: background .15s ease, border-color .15s ease, color .15s ease; }
+    .btn:hover { background: rgba(255,255,255,0.04); border-color:#2a3a6c; }
+    .btn:active { background: rgba(255,255,255,0.06); }
+    .btn.primary { background: transparent; border-color: var(--accent); color: var(--text); }
+    .btn.primary:hover { background: rgba(124,156,255,0.12); }
+    .btn.success { background: transparent; border-color: var(--accent-2); color: var(--text); }
+    .btn.success:hover { background: rgba(48,209,88,0.12); }
+    .btn.ghost { background: transparent; border-color: var(--border); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .row { display:flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .chip { padding: 5px 8px; border-radius: 999px; border: 1px solid var(--chip-border); background: transparent; color: var(--muted); font-size:12px; }
+    .section-title { font-weight: 700; margin: 2px 0 8px; font-size: 13px; letter-spacing: .2px; text-transform: uppercase; color: #c7d2ff; }
+    .table { width:100%; border-collapse: collapse; font-size: 13.5px; }
+    .table th, .table td { padding: 10px 8px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    .table th { color: var(--muted); font-weight: 600; }
+    @media (max-width: 768px) {
+      .table { font-size: 12px; }
+      .table th, .table td { padding: 8px 4px; }
+      .table th:nth-child(2), .table td:nth-child(2) { display: none; } /* Hide pattern column on mobile */
+    }
+    .pill { padding: 2px 6px; border-radius: 6px; font-size: 11px; display:inline-block; border: 1px solid var(--chip-border); background: transparent; }
+    .pill.recurring { color: #9ef5c0; border-color: rgba(48,209,88,0.45); }
+    .pill.potential { color: #ffe29a; border-color: rgba(255,209,102,0.45); }
+    .pill.oneoff { color: #c6d3ff; border-color: rgba(124,156,255,0.45); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+    .footer { color: var(--muted); font-size: 12px; text-align: center; padding: 14px 0; }
+    .hidden { display: none !important; }
+    .help { color: var(--muted); font-size: 12.5px; line-height: 1.6; }
+    .small { font-size: 12.5px; color: var(--muted); }
+    .danger { color: var(--danger); }
+    .summary { display:grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @media (min-width: 900px) { .summary { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 480px) {
+      .summary { grid-template-columns: 1fr; gap: 8px; }
+      .stat { padding: 10px; }
+    }
+    .summary .stat { background: transparent; border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+    .stat .label { color: var(--muted); font-size: 12px; }
+    .stat .value { font-weight: 700; font-size: 18px; margin-top: 4px; }
+    .list-unstyled { list-style: none; padding-left: 0; margin: 0; }
+    .list-unstyled li + li{ margin-top: 4px; }
+    .inline-actions { display:flex; gap:6px; flex-wrap: wrap; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: transparent; border:1px solid var(--chip-border); border-radius:6px; padding:2px 6px; font-size:12px; color:#c7d2ff; }
+    /* Inputs */
+    input[type="number"], input[type="text"], input[type="search"], input[type="email"] { height: 34px; font-size: 14px; padding:8px 10px; border-radius:8px; border:1px solid var(--border); background: transparent; color:var(--text); }
+    @media (max-width: 768px) {
+      input[type="number"], input[type="text"], input[type="search"], input[type="email"] {
+        height: 40px; font-size: 16px; /* Prevents zoom on iOS */
+      }
+    }
+      /* Mobile nav (hamburger) */
+      .mobile-menu { 
+        display: none; 
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        padding: 20px;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      }
+      .mobile-menu.hidden { display: none; }
+      .mobile-menu .btn { width: 100%; justify-content: center; margin-bottom: 8px; }
+      .mobile-menu-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        display: none;
+      }
+      .mobile-menu-backdrop.active { display: block; }
+
+      /* Show hamburger and hide desktop actions on small screens */
+      #menuToggle { display: none; }
+      @media (max-width: 768px) {
+        #menuToggle { display: inline-flex !important; align-self: flex-end; }
+        .nav-actions { display: none !important; }
+        .mobile-menu { display: block; }
+        body.menu-open { overflow: hidden; }
+      }
+    </style>
+</head>
+<body>
+  <div class="mobile-menu-backdrop" id="mobileBackdrop"></div>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <img src="./logo-white.svg" alt="SubKiller Logo - Free Subscription Detection Tool by Alvento Ltd" width="200" height="200" style="display:block"/>
+        <div class="privacy-badge">
+          <span class="badge" style="background: rgba(48,209,88,0.1); border-color: rgba(48,209,88,0.3); color: #9ef5c0;">🔒 Client-side • No data leaves your device</span>
+        </div>
+      </div>
+      <div class="row" id="navRow">
+        <button id="menuToggle" class="btn ghost" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenu" style="display:none">☰ Menu</button>
+        <div class="nav-actions">
+          <button id="exportBtn" class="btn ghost hidden" disabled title="Available after analysis">Export Results (CSV)</button>
+          <a id="tutorialLink" class="btn ghost" href="tutorial.html">Tutorial</a>
+          <a id="helpLink" class="btn ghost" href="#how-it-works">How it works</a>
+          <a id="pricingLink" class="btn ghost" href="#pricing">Pricing</a>
+          <button id="upgradeBtn" class="btn success">Upgrade to Pro</button>
+        </div>
+      </div>
+      <div id="mobileMenu" class="mobile-menu hidden" aria-label="Mobile menu">
+        <a class="btn ghost" href="tutorial.html">Tutorial</a>
+        <a class="btn ghost" href="#how-it-works">How it works</a>
+        <a class="btn ghost" href="#pricing">Pricing</a>
+        <button class="btn success" id="upgradeBtnMobile">Upgrade to Pro</button>
+        <button class="btn ghost" id="exportBtnMobile" disabled title="Available after analysis">Export Results (CSV)</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h1>Detect and cancel recurring charges fast</h1>
+        <p class="lead">Upload your bank or PayPal CSV. We’ll detect subscriptions and generate a cancel checklist. All processing happens in your browser.</p>
+        <div class="uploader" id="dropZone">
+          <input id="fileInput" type="file" accept=".csv,.xlsx,.xls,.pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/pdf" multiple class="hidden"/>
+          <p>Drag & drop files here, or</p>
+          <button class="btn success" id="browseBtn">Browse Files</button>
+          <div class="chips" style="margin-top:10px">
+            <span class="chip">Supported: CSV, Excel (.xlsx/.xls), PDF statements</span>
+            <span class="chip">No sign-in required</span>
+            <span class="chip">Free local processing</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px;" class="row">
+          <div class="chips">
+            <span class="chip">Heuristics: merchant similarity, periodicity, memo patterns</span>
+            <span class="chip">Frequency: monthly / annual detection</span>
+            <span class="chip">Confidence score</span>
+          </div>
+        </div>
+
+        <div class="summary" style="margin-top:18px">
+          <div class="stat"><div class="label">Files</div><div id="statFiles" class="value">0</div></div>
+          <div class="stat"><div class="label">Transactions</div><div id="statTx" class="value">0</div></div>
+          <div class="stat"><div class="label">Recurring</div><div id="statRecurring" class="value">0</div></div>
+          <div class="stat"><div class="label">Monthly Spend</div><div id="statMonthly" class="value">$0.00</div></div>
+        </div>
+      </div>
+
+      <div class="card" id="controlsCard">
+        <div class="section-title">Detection Settings</div>
+        <div class="row" style="gap:12px">
+          <label class="small" style="min-width:110px">Min repeats</label>
+          <input id="minRepeats" type="number" min="2" max="12" value="2" style="width:100px; padding:10px; border-radius:10px; border:1px solid #2a3a6c; background:#0f1a36; color:var(--text)"/>
+        </div>
+        <div class="row" style="margin-top:10px; gap:12px">
+          <label class="small" style="min-width:110px">Max variance (days)</label>
+          <input id="maxVarianceDays" type="number" min="1" max="15" value="4" style="width:120px; padding:10px; border-radius:10px; border:1px solid #2a3a6c; background:#0f1a36; color:var(--text)"/>
+        </div>
+        <div class="row" style="margin-top:10px; gap:12px">
+          <label class="small" style="min-width:110px">Amount tolerance (%)</label>
+          <input id="amountTolerancePct" type="number" min="0" max="15" value="5" style="width:120px; padding:10px; border-radius:10px; border:1px solid #2a3a6c; background:#0f1a36; color:var(--text)"/>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <button id="analyzeBtn" class="btn primary" disabled>Analyze</button>
+          <button id="resetBtn" class="btn">Reset</button>
+        </div>
+        <div class="help" style="margin-top:10px">
+          Tip: You can combine multiple CSVs (e.g., 2 banks + PayPal). We auto-merge and de-duplicate similar merchants.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="proGateCard" style="margin-top:18px">
+      <div class="section-title">Pro Status</div>
+      <div class="row" style="gap:12px">
+        <span id="proStatusBadge" class="badge">Free mode</span>
+      </div>
+      <div class="row" style="margin-top:10px; gap:8px">
+        <input id="licenseInput" placeholder="Paste license key" style="flex:1; padding:10px; border-radius:10px; border:1px solid #2a3a6c; background:#0f1a36; color:var(--text)"/>
+        <button id="applyLicenseBtn" class="btn primary">Apply License</button>
+        <button id="clearLicenseBtn" class="btn">Clear</button>
+      </div>
+      <div class="help" style="margin-top:8px">Pro unlocks: Unlimited results, PDF export, vendor links, advanced settings.</div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <div class="section-title">Detected Subscriptions</div>
+      <div id="confidenceHelp" class="small" style="margin:-6px 0 8px; color: var(--muted);">
+        Confidence considers repeats, timing variance, and amount stability. "Needs Review" means the pattern is not clearly monthly/annual.
+      </div>
+      <div id="proOverlay" class="help" style="display:none; margin-bottom:10px">
+        Some features are Pro-only. You can still analyze and preview top results in Free mode.
+      </div>
+      <table class="table" id="resultsTable">
+        <thead>
+          <tr>
+            <th>Merchant</th>
+            <th>Pattern</th>
+            <th>Avg Amount</th>
+            <th>Frequency</th>
+            <th>Confidence</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody">
+          <tr id="placeholderRow"><td colspan="6" class="small">No results yet. Upload CSVs and click Analyze.</td></tr>
+        </tbody>
+      </table>
+      
+      <!-- AdSense Display Ad -->
+      <div id="adContainer" class="hidden" style="margin: 20px 0; text-align: center;">
+        <div class="small" style="margin-bottom: 8px; color: var(--muted);">Advertisement</div>
+        <!-- Subscription Results Ad -->
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-3068263471463445"
+             data-ad-slot="5213029072"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+      </div>
+    </div>
+
+    <!-- Email Capture Lead Magnet -->
+    <div id="emailCaptureCard" class="card hidden" style="margin-top:18px; background: rgba(124,156,255,0.05); border-color: rgba(124,156,255,0.3);">
+      <div style="text-align: center;">
+        <h3 style="margin: 0 0 8px; color: var(--accent);">🎁 Get Your FREE Subscription Cancellation Kit</h3>
+        <p class="lead" style="margin: 0 0 12px;">Email templates, negotiation scripts, and money-saving tips delivered instantly!</p>
+        <div style="display: flex; gap: 8px; max-width: 400px; margin: 0 auto;">
+          <input id="emailInput" type="email" placeholder="Enter your email" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: var(--text);" />
+          <button id="getKitBtn" class="btn primary" style="padding: 12px 20px;">Get Kit FREE</button>
+        </div>
+        <div class="small" style="margin-top: 6px; color: var(--muted);">No spam. Unsubscribe anytime. We'll also send you weekly money-saving tips.</div>
+      </div>
+    </div>
+
+    <div id="how-it-works" class="card" style="margin-top:18px">
+      <div class="section-title">How it works</div>
+      <ul class="list-unstyled">
+        <li>1. Import your CSV exports from your bank or PayPal (no login needed).</li>
+        <li>2. We normalize dates, amounts, and merchant names, then cluster transactions by merchant similarity.</li>
+        <li>3. We detect periodicity (monthly/annual) by measuring gaps between charges with tolerance for weekends/holidays.</li>
+        <li>4. We score confidence based on repeats, variance, amount consistency, and known subscription keywords.</li>
+        <li>5. You get a cancel checklist with links and canned messages. All local — nothing uploaded.</li>
+      </ul>
+      <div class="inline-actions" style="margin-top:8px">
+        <button id="downloadChecklistBtn" class="btn success" disabled data-pro="true" title="Pro feature">Download Cancel Checklist (PDF)</button>
+        <button id="exportJSONBtn" class="btn ghost" disabled>Export JSON</button>
+        <button id="toggleVendorLinksBtn" class="btn ghost" data-pro="true" title="Pro feature" disabled>Show Vendor Links</button>
+      </div>
+    </div>
+
+    <!-- Done-For-You Service Upsell -->
+    <div id="doneForYouCard" class="card hidden" style="margin-top:18px; background: rgba(48,209,88,0.08); border-color: rgba(48,209,88,0.4); position: relative;">
+      <div style="position: absolute; top: -8px; right: 8px; background: var(--accent-2); color: #0b1220; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">⚡ LIMITED TIME</div>
+      <div style="text-align: center;">
+        <h3 style="margin: 0 0 8px; color: var(--accent-2);">🎯 Too Busy to Cancel These Yourself?</h3>
+        <p class="lead" style="margin: 0 0 12px;">We'll cancel ALL your unwanted subscriptions within 48 hours. Guaranteed.</p>
+        <div id="savingsEstimate" class="value" style="color: var(--accent-2); font-size: 20px; margin: 8px 0;">Potential Annual Savings: £0</div>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin: 16px 0;">
+          <div class="value" style="color: var(--accent-2); font-size: 32px;">£49</div>
+          <div style="text-align: left;">
+            <div class="small" style="color: var(--muted);">One-time fee</div>
+            <div class="small" style="color: var(--accent-2);">Money-back guarantee</div>
+          </div>
+        </div>
+        <button id="doneForYouBtn" class="btn" style="background: var(--accent-2); border-color: var(--accent-2); color: #0b1220; font-weight: 600; font-size: 16px; padding: 14px 28px;">🚀 Cancel Everything For Me</button>
+        <div class="small" style="margin-top: 8px; color: var(--muted);">✓ Professional cancellation service ✓ Email confirmations ✓ 48-hour turnaround</div>
+      </div>
+    </div>
+
+    <div id="pricing" class="card" style="margin-top:18px">
+      <div class="section-title">Pricing</div>
+      <div class="grid" style="grid-template-columns: 1fr; gap:12px">
+        <div class="summary">
+          <div class="stat">
+            <div class="label">Free</div>
+            <div class="value">£0</div>
+            <ul class="list-unstyled" style="margin-top:8px">
+              <li>• Client-side processing</li>
+              <li>• Analyze CSVs</li>
+              <li>• Preview up to 3 detected subscriptions</li>
+              <li>• Export TXT checklist</li>
+            </ul>
+          </div>
+          <div class="stat" style="background: rgba(48,209,88,0.05); border-color: rgba(48,209,88,0.3); position: relative;">
+            <div style="position: absolute; top: -8px; right: 8px; background: var(--accent-2); color: #0b1220; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">🚀 POPULAR</div>
+            <div class="label">Pro (Early Access)</div>
+            <div class="value" style="color: var(--accent-2); font-size: 24px;">£19 <span style="font-size: 14px; color: var(--muted);">one-time</span></div>
+            <div style="margin: 4px 0 8px; padding: 4px 8px; background: rgba(48,209,88,0.1); border-radius: 6px; font-size: 12px; color: var(--accent-2); text-align: center;">💰 Save £100s on cancelled subscriptions</div>
+            <ul class="list-unstyled" style="margin-top:8px">
+              <li style="color: var(--accent-2);">✓ Unlimited results</li>
+              <li style="color: var(--accent-2);">✓ PDF export with cancel steps</li>
+              <li style="color: var(--accent-2);">✓ Vendor links and cancel portals</li>
+              <li style="color: var(--accent-2);">✓ Advanced detection settings</li>
+              <li style="color: var(--accent-2);">✓ Excel & PDF statement support</li>
+            </ul>
+            <button id="checkoutBtn" class="btn" style="margin-top:12px; background: var(--accent-2); border-color: var(--accent-2); color: #0b1220; font-weight: 600; width: 100%;">🔥 Go Pro Now</button>
+            <div class="small" style="margin-top:6px; text-align: center;">Uses Stripe Checkout. Instant license key delivery.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amazon Affiliate Recommendations -->
+    <div id="recommendationsCard" class="card hidden" style="margin-top:18px">
+      <div class="section-title">💡 Take Control of Your Finances</div>
+      <p class="small" style="margin: 0 0 12px; color: var(--muted);">Since you're taking control of subscriptions, here are some tools our users love:</p>
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <div class="stat" style="text-align: center;">
+          <img src="https://m.media-amazon.com/images/I/41TvtYZ5NFL._SX342_SY445_.jpg" alt="Budget Planner Book" style="width: 80px; height: 100px; object-fit: cover; margin-bottom: 8px; border-radius: 4px;" />
+          <div class="label" style="font-weight: 600;">Budget Planner</div>
+          <div class="small" style="margin: 4px 0 8px;">Monthly expense tracker</div>
+          <a href="https://www.amazon.co.uk/dp/B09HJJQ8F7?tag=subkiller-21" target="_blank" class="btn ghost" style="font-size: 12px;">View on Amazon</a>
+        </div>
+        <div class="stat" style="text-align: center;">
+          <img src="https://m.media-amazon.com/images/I/51E2055ZGUL._SX324_BO1,204,203,200_.jpg" alt="Your Money or Your Life Book" style="width: 80px; height: 100px; object-fit: cover; margin-bottom: 8px; border-radius: 4px;" />
+          <div class="label" style="font-weight: 600;">Your Money or Your Life</div>
+          <div class="small" style="margin: 4px 0 8px;">Financial independence guide</div>
+          <a href="https://www.amazon.co.uk/dp/0143115766?tag=subkiller-21" target="_blank" class="btn ghost" style="font-size: 12px;">View on Amazon</a>
+        </div>
+        <div class="stat" style="text-align: center;">
+          <img src="https://m.media-amazon.com/images/I/51AzVkW4URL._SX327_BO1,204,203,200_.jpg" alt="The Total Money Makeover Book" style="width: 80px; height: 100px; object-fit: cover; margin-bottom: 8px; border-radius: 4px;" />
+          <div class="label" style="font-weight: 600;">Total Money Makeover</div>
+          <div class="small" style="margin: 4px 0 8px;">Dave Ramsey's debt plan</div>
+          <a href="https://www.amazon.co.uk/dp/1595555277?tag=subkiller-21" target="_blank" class="btn ghost" style="font-size: 12px;">View on Amazon</a>
+        </div>
+      </div>
+      <div class="small" style="margin-top: 12px; text-align: center; color: var(--muted);">As an Amazon Associate, we earn from qualifying purchases.</div>
+    </div>
+
+    <div class="footer">
+      v0.1 Client-side MVP. Optional backend coming soon for bank-specific formats, account linking, and email receipts parsing.
+      <br>
+      <a href="tutorial.html" style="margin: 0 8px;">Tutorial</a> |
+      <a href="privacy.html" style="margin: 0 8px;">Privacy Policy</a> |
+      <a href="terms.html" style="margin: 0 8px;">Terms of Service</a> |
+      <a href="about.html" style="margin: 0 8px;">About</a>
+    </div>
+    <style>
+      /* Enhanced mobile responsiveness */
+      @media (max-width: 768px) {
+        h1 { font-size: 24px; line-height: 1.3; }
+        .lead { font-size: 14px; }
+        .btn { padding: 10px 14px; min-height: 44px; /* Touch target */ }
+        .uploader { padding: 16px; }
+        .chips { gap: 4px; }
+        .chip { font-size: 11px; padding: 4px 6px; }
+      }
+      @media (max-width: 480px) {
+        header .row { gap:6px; flex-direction: column; align-items: stretch; }
+        .nav-actions { flex-direction: column; gap: 8px; }
+        .btn { width: 100%; justify-content: center; }
+        h1 { font-size: 22px; }
+        .inline-actions { flex-direction: column; }
+        .inline-actions .btn { width: 100%; }
+        .row { flex-direction: column; gap: 12px; }
+        #emailCaptureCard .row { flex-direction: row; }
+        #doneForYouCard .row { flex-direction: column; }
+      }
+    </style>
+  </div>
+
+  <script>
+  // Utils
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const fmtCurrency = (n, currency="USD") => {
+    try { return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(n); }
+    catch { return "$" + n.toFixed(2); }
+  };
+  const parseNumber = (s) => {
+    if (typeof s === "number") return s;
+    if (!s) return 0;
+    const t = String(s).replace(/[^0-9\-\.,]/g, "");
+    // handle , as thousand separator and . as decimal, or vice versa
+    const comma = t.includes(",");
+    const dot = t.includes(".");
+    if (comma && dot) {
+      if (t.lastIndexOf(",") > t.lastIndexOf(".")) {
+        // "1.234,56" -> "1234.56"
+        return parseFloat(t.replace(/\./g, "").replace(",", "."));
+      } else {
+        // "1,234.56" -> "1234.56"
+        return parseFloat(t.replace(/,/g, ""));
+      }
+    }
+    if (comma && !dot) {
+      // "123,45" assume decimal comma
+      const parts = t.split(",");
+      if (parts[1] && parts[1].length <= 2) return parseFloat(parts[0].replace(/\./g, "" ) + "." + parts[1]);
+      return parseFloat(t.replace(/,/g, ""));
+    }
+    return parseFloat(t);
+  };
+  const normalizeMerchant = (name = "") => {
+    const n = name.toLowerCase()
+      .replace(/\s+/g, " ")
+      .replace(/[^a-z0-9\s\-\_\.]/g, "")
+      .trim();
+    return n
+      .replace(/(ltd|inc|llc|limited|the|co|corp|plc)\b/g, "")
+      .replace(/\b(uk|us|eu)\b/g, "")
+      .replace(/\b(payment|purchase|subscription|recurring|charge|debit|credit|pos)\b/g, "")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+  };
+  const dateFrom = (v) => {
+    if (v instanceof Date) return v;
+    if (!v) return null;
+    const d = new Date(v);
+    if (!isNaN(d)) return d;
+    // try dd/mm/yyyy
+    const m = String(v).match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
+    if (m) {
+      const dd = parseInt(m[1],10), mm = parseInt(m[2],10)-1, yyyy = parseInt(m[3].length===2 ? "20"+m[3] : m[3],10);
+      const dt = new Date(yyyy, mm, dd);
+      return isNaN(dt) ? null : dt;
+    }
+    return null;
+  };
+  const daysBetween = (a, b) => Math.abs((b - a) / (1000*60*60*24));
+
+  // CSV parsing (no external lib)
+  function parseCSV(text) {
+    const rows = [];
+    let i = 0, field = "", quote = false, row = [];
+    while (i < text.length) {
+      const c = text[i];
+      if (quote) {
+        if (c === '"') {
+          if (text[i+1] === '"') { field += '"'; i++; }
+          else { quote = false; }
+        } else { field += c; }
+      } else {
+        if (c === '"') quote = true;
+        else if (c === ",") { row.push(field); field = ""; }
+        else if (c === "\n" || c === "\r") {
+          if (field.length || row.length) { row.push(field); rows.push(row); row = []; field = ""; }
+          // handle \r\n
+          if (c === "\r" && text[i+1] === "\n") i++;
+        } else { field += c; }
+      }
+      i++;
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows.filter(r => r.some(x => x !== ""));
+  }
+
+  // Heuristics keywords to boost confidence
+  const KEYWORDS = [
+    "subscription", "recurring", "netflix", "spotify", "amazon", "prime", "google", "apple", "icloud", 
+    "microsoft", "adobe", "notion", "canva", "dropbox", "zoom", "slack", "openai", "midjourney", "chatgpt", 
+    "patreon", "substack", "onlyfans", "xbox", "playstation", "steam", "github", "atlassian", "airtable", 
+    "loom", "figma", "tinder", "bumble",
+    // Grocery delivery & box services
+    "ocado", "hellofresh", "gousto", "mindfulchef", "simplycook", "riverford", "abel", "cole", "graze",
+    "marley", "spoon", "dishpatch", "feedme", "allplants", "plantbased", "veganized", "mindful", "chef",
+    "recipe", "meal", "box", "fresh", "organic", "weekly", "delivery", "subscription", "plan"
+  ];
+
+  // State
+  let files = [];
+  let transactions = []; // normalized
+  let results = [];
+
+  function guessColumns(header) {
+    const lower = header.map(h => h.toLowerCase().trim());
+    const idx = {
+      date: lower.findIndex(h => /(date|posted|time)/.test(h)),
+      amount: lower.findIndex(h => /(amount|value|amt|debit|credit)/.test(h)),
+      description: lower.findIndex(h => /(description|memo|details|name|narrative|merchant|payee)/.test(h)),
+      type: lower.findIndex(h => /(type|category|transaction type)/.test(h)),
+      currency: lower.findIndex(h => /(currency|curr)/.test(h))
+    };
+    return idx;
+  }
+
+  function normalizeRows(rows) {
+    if (!rows.length) return [];
+    let header = null;
+    // Detect header: row with any alpha
+    if (rows[0].some(c => /[A-Za-z]/.test(c))) header = rows[0];
+    const data = header ? rows.slice(1) : rows;
+    const idx = header ? guessColumns(header) : { date:0, amount:1, description:2, type:3, currency:4 };
+    const out = [];
+    for (const r of data) {
+      const date = dateFrom(r[idx.date]);
+      if (!date) continue;
+      let amount = parseNumber(r[idx.amount]);
+      const desc = (r[idx.description] ?? "").trim();
+      const type = (idx.type >= 0 ? (r[idx.type] ?? "") : "").trim();
+      const currency = (idx.currency >= 0 ? (r[idx.currency] ?? "") : "USD").trim() || "USD";
+      
+      // Skip declined transactions (common in Monzo CSV)
+      const fullRow = r.join(' ').toLowerCase();
+      if (fullRow.includes('declined') || fullRow.includes('card_closed') || fullRow.includes('decisioning_engine_hard_decline')) {
+        continue;
+      }
+      
+      // If some sources represent outflows as negative in type, adjust
+      if (!String(amount).includes("-") && /(debit|out|purchase|card)/i.test(type)) amount = -Math.abs(amount);
+      out.push({
+        date,
+        amount,
+        absAmount: Math.abs(amount),
+        direction: amount < 0 ? "debit" : "credit",
+        description: desc,
+        normMerchant: normalizeMerchant(desc),
+        raw: r,
+        currency
+      });
+    }
+    return out;
+  }
+
+  function clusterByMerchant(tx) {
+    // Map normalized merchant to transactions
+    const map = new Map();
+    for (const t of tx) {
+      const key = t.normMerchant || "unknown";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(t);
+    }
+    // Merge very similar merchants (edit distance-like via substring)
+    const keys = Array.from(map.keys());
+    for (let i=0;i<keys.length;i++){
+      for (let j=i+1;j<keys.length;j++){
+        const a = keys[i], b = keys[j];
+        if (a==="unknown" || b==="unknown") continue;
+        if (a.length>=5 && b.includes(a) || b.length>=5 && a.includes(b)) {
+          // merge b into a
+          const arr = (map.get(a) || []).concat(map.get(b) || []);
+          map.set(a, arr);
+          map.delete(b);
+        }
+      }
+    }
+    return map;
+  }
+
+  function detectRecurring(groups, settings) {
+    const out = [];
+    for (const [merchant, txs] of groups.entries()) {
+      const debits = txs.filter(t => t.direction === "debit").sort((a,b)=>a.date-b.date);
+      if (debits.length < settings.minRepeats) continue;
+
+      // Filter out obvious non-subscriptions (but allow delivery services)
+      const merchantLower = merchant.toLowerCase();
+      const nonSubscriptionMerchants = [
+        'chessington', 'thorpe park', 'alton towers', 'legoland',
+        'mcdonalds', 'kfc', 'burger king', 'starbucks', 'costa',
+        'parking', 'car park', 'petrol', 'shell', 'bp', 'esso',
+        'hospital', 'pharmacy', 'boots', 'superdrug',
+        'barbershop', 'barber', 'hairdresser', 'salon'
+      ];
+      
+      // Allow regular grocery stores ONLY if they have subscription keywords
+      const groceryStores = ['sainsbury', 'tesco', 'asda', 'morrisons', 'waitrose', 'co-op'];
+      const hasSubscriptionKeywords = KEYWORDS.some(k => merchantLower.includes(k));
+      
+      if (nonSubscriptionMerchants.some(nm => merchantLower.includes(nm))) {
+        continue; // Skip obvious non-subscription merchants
+      }
+      
+      // Skip regular grocery stores unless they have subscription indicators
+      if (groceryStores.some(gs => merchantLower.includes(gs)) && !hasSubscriptionKeywords) {
+        continue;
+      }
+
+      // compute intervals and amount stability
+      const intervals = [];
+      for (let i=1;i<debits.length;i++) {
+        intervals.push(daysBetween(debits[i-1].date, debits[i].date));
+      }
+      if (!intervals.length) continue;
+
+      const avg = debits.reduce((s,t)=>s+t.absAmount,0)/debits.length;
+      const amountStd = Math.sqrt(debits.reduce((s,t)=>s+Math.pow(t.absAmount-avg,2),0)/debits.length);
+      const amountTol = (settings.amountTolerancePct/100) * avg;
+      const amountStable = amountStd <= amountTol;
+
+      // periodicity: check near 30 or 365 days with variance
+      const near = (target) => intervals.every(d => Math.abs(d-target) <= settings.maxVarianceDays);
+      const isMonthly = near(30) || near(31) || near(28);
+      const isAnnual = near(365) || near(366);
+
+      // If not strict every interval, try majority rule
+      const countNear = (target) => intervals.filter(d => Math.abs(d-target) <= settings.maxVarianceDays).length;
+      const monthlyMajority = countNear(30)+countNear(31)+countNear(28) >= Math.max(2, Math.ceil(intervals.length*0.6));
+      const annualMajority = countNear(365)+countNear(366) >= Math.max(1, Math.ceil(intervals.length*0.6));
+
+      const frequency = isMonthly || monthlyMajority ? "Monthly" : (isAnnual || annualMajority ? "Annual" : null);
+      if (!frequency && (!amountStable || intervals.length < settings.minRepeats-1)) continue;
+
+      // Filter out transactions that are too close together (same day attempts)
+      const minInterval = Math.min(...intervals);
+      if (minInterval < 1) continue; // Skip same-day multiple attempts
+
+      // confidence score with delivery service boost
+      const repeatsScore = Math.min(1, (debits.length-1) / 5);
+      const variancePenalty = Math.min(1, (settings.maxVarianceDays / 10));
+      const amountScore = amountStable ? 0.9 : 0.4;
+      const keywordBoost = KEYWORDS.some(k => merchantLower.includes(k)) ? 0.15 : 0;
+      
+      // Extra boost for known delivery/box services
+      const deliveryServices = ['ocado', 'hellofresh', 'gousto', 'mindfulchef', 'simplycook', 'riverford'];
+      const deliveryBoost = deliveryServices.some(ds => merchantLower.includes(ds)) ? 0.2 : 0;
+      
+      let confidence = Math.max(0, Math.min(1, 0.3*repeatsScore + 0.3*amountScore + 0.25*(frequency?1:0.5) + 0.15* (1-variancePenalty) + keywordBoost + deliveryBoost));
+
+      out.push({
+        merchant,
+        displayMerchant: debits[debits.length-1]?.description || merchant,
+        count: debits.length,
+        avgAmount: avg,
+        currency: debits[0]?.currency || "USD",
+        frequency: frequency || "Potential",
+        confidence,
+        examples: debits.slice(-3), // last 3 examples
+      });
+    }
+    // sort by confidence then amount desc
+    out.sort((a,b) => b.confidence - a.confidence || b.avgAmount - a.avgAmount);
+    return out;
+  }
+
+  function frequencyPill(fq) {
+    if (fq === "Monthly") return "<span class='pill recurring'>Monthly</span>";
+    if (fq === "Annual") return "<span class='pill recurring'>Annual</span>";
+    return "<span class='pill potential'>Needs Review</span>";
+  }
+
+  function confidencePct(c) { return Math.round(c*100); }
+
+  function renderResults(list) {
+    const body = $("#resultsBody");
+    body.innerHTML = "";
+    if (!list.length) {
+      body.innerHTML = "<tr><td colspan='6' class='small'>No recurring patterns found. Try lowering min repeats or increasing variance.</td></tr>";
+      $("#exportBtn").disabled = true;
+      $("#downloadChecklistBtn").disabled = true;
+      $("#exportJSONBtn").disabled = true;
+      return;
+    }
+
+    // Apply free gating: show only top 3 when not Pro
+    const isPro = getPro();
+    const visible = isPro ? list : list.slice(0, 3);
+
+    for (const r of visible) {
+      const pattern = r.examples.map(e => {
+        const d = e.date.toISOString().slice(0,10);
+        return `<span class="kbd">${d}</span> <span class="kbd">${fmtCurrency(e.absAmount, r.currency)}</span>`;
+      }).join(" ");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><div>${r.displayMerchant}</div><div class="small mono">${r.merchant}</div></td>
+        <td>${pattern || "<span class='small'>—</span>"}</td>
+        <td>${fmtCurrency(r.avgAmount, r.currency)}</td>
+        <td>${frequencyPill(r.frequency)}</td>
+        <td>${confidencePct(r.confidence)}%</td>
+        <td>
+          <div class="inline-actions">
+            <button class="btn ghost btn-cancel" data-merchant="${encodeURIComponent(r.merchant)}">Cancel Steps</button>
+            <button class="btn ghost btn-keep" data-merchant="${encodeURIComponent(r.merchant)}">Mark as Keep</button>
+          </div>
+        </td>
+      `;
+      body.appendChild(row);
+    }
+    $("#exportBtn").disabled = false;
+    $("#downloadChecklistBtn").disabled = !isPro;
+    $("#exportJSONBtn").disabled = false;
+
+    // Add locked row hint for Free mode
+    if (!isPro && list.length > visible.length) {
+      const lockRow = document.createElement("tr");
+      lockRow.innerHTML = `<td colspan="6" class="small">
+        ${list.length - visible.length} more results hidden in Free mode.
+        <button class="btn success" id="inlineUpgradeBtn" style="margin-left:8px">Upgrade to Pro</button>
+      </td>`;
+      body.appendChild(lockRow);
+      document.querySelector("#inlineUpgradeBtn")?.addEventListener("click", () => openCheckout());
+    }
+  }
+
+  function updateStats() {
+    $("#statFiles").textContent = files.length;
+    $("#statTx").textContent = transactions.length;
+    const recurringCount = results.filter(r => r.frequency !== "Potential").length;
+    $("#statRecurring").textContent = recurringCount;
+    const monthlySpend = results.filter(r => r.frequency === "Monthly").reduce((s,r)=>s+r.avgAmount,0);
+    $("#statMonthly").textContent = fmtCurrency(monthlySpend, results[0]?.currency || "USD");
+  }
+
+  function toCSV(rows) {
+    const esc = (v) => {
+      const s = String(v ?? "");
+      if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    };
+    return rows.map(r => r.map(esc).join(",")).join("\r\n");
+  }
+
+  function exportResultsCSV() {
+    if (!results.length) return;
+    const header = ["Merchant","Avg Amount","Currency","Frequency","Confidence %","Repeats","Examples"];
+    const rows = [header];
+    for (const r of results) {
+      rows.push([
+        r.displayMerchant,
+        r.avgAmount.toFixed(2),
+        r.currency,
+        r.frequency,
+        confidencePct(r.confidence),
+        r.count,
+        r.examples.map(e => e.date.toISOString().slice(0,10)+" "+e.absAmount.toFixed(2)).join(" | ")
+      ]);
+    }
+    const blob = new Blob([toCSV(rows)], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "subscription-killer-results.csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function exportResultsJSON() {
+    if (!results.length) return;
+    const payload = { generatedAt: new Date().toISOString(), results };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "subscription-killer-results.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function buildChecklist(merchant) {
+    const r = results.find(x => x.merchant === merchant);
+    if (!r) return "";
+    const vendorName = r.displayMerchant || merchant;
+    const likelyPortal = `https://www.google.com/search?q=${encodeURIComponent(vendorName + " cancel subscription login")}`;
+    const emailAddrGuess = `support@${(merchant.split(" ")[0]||"vendor")}.com`;
+    const template = `
+Cancel Checklist — ${vendorName}
+
+1) Locate Account/Portal
+- Try: ${likelyPortal}
+- Check your email for "Welcome to ${vendorName}" or "Your subscription" to find the original sign-up.
+- Look for an account portal under "Billing", "Subscriptions", "Manage Plan".
+
+2) Identify Plan and Billing Cycle
+- Detected Frequency: ${r.frequency}
+- Approx. Amount: ${fmtCurrency(r.avgAmount, r.currency)}
+- Last charges: ${r.examples.map(e => e.date.toISOString().slice(0,10)).join(", ")}
+
+3) Cancel via Portal (preferred)
+- Navigate to the portal and look for "Cancel", "Downgrade", or "Manage subscription".
+
+4) Email Cancellation (if portal not found)
+To: ${emailAddrGuess}
+Subject: Request to cancel subscription and delete billing data
+Body:
+Hello ${vendorName} Support,
+Please cancel my subscription associated with this email and confirm by reply. Also remove my stored payment details and personal data per your policy.
+Thank you.
+
+5) Bank Fallback
+- If charges continue, contact your bank to block merchant recurring payments.
+
+Note: Keep screenshots/emails of the cancellation confirmation.
+
+Generated locally by Subscription Killer.
+`.trim();
+    return template;
+  }
+
+  function downloadChecklistPDF() {
+    if (!results.length) return;
+    // simple text-based PDF via browser print, but we generate a blob as .txt for MVP
+    const txt = results.map(r => buildChecklist(r.merchant)).join("\n\n-----------------------\n\n");
+    const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "subscription-cancel-checklist.txt";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  // License and Pro gating
+  const LICENSE_KEY = "subkiller_license";
+  const PRO_STATUS_KEY = "subkiller_pro";
+  const VALID_PREFIX = "SK-"; // placeholder rule for MVP
+
+  function getLicense() {
+    try { return localStorage.getItem(LICENSE_KEY) || ""; } catch { return ""; }
+  }
+  function setLicense(v) {
+    try { localStorage.setItem(LICENSE_KEY, v || ""); } catch {}
+  }
+  function getPro() {
+    try { return localStorage.getItem(PRO_STATUS_KEY) === "1"; } catch { return false; }
+  }
+  function setPro(v) {
+    try { localStorage.setItem(PRO_STATUS_KEY, v ? "1" : "0"); } catch {}
+  }
+  function validateLicense(lic) {
+    // MVP soft validation: starts with SK- and length >= 10
+    return typeof lic === "string" && lic.startsWith(VALID_PREFIX) && lic.length >= 10;
+  }
+  function refreshProUI() {
+    const isPro = getPro();
+    $("#proStatusBadge").textContent = isPro ? "Pro active" : "Free mode";
+    $("#proStatusBadge").style.color = isPro ? "#9ef5c0" : "";
+    $("#downloadChecklistBtn").disabled = !isPro;
+    $("#toggleVendorLinksBtn").disabled = !isPro;
+    // Show overlay note in free
+    $("#proOverlay").style.display = isPro ? "none" : "block";
+    // Show advanced settings only for Pro (example: reduce min repeats cap)
+    $("#minRepeats").max = isPro ? 12 : 4;
+  }
+  function openCheckout() {
+    // Placeholder Stripe link — replace with your Stripe Checkout URL
+    const stripeUrl = "https://buy.stripe.com/fZu14ofbXdTH5DB78z2oE00"; 
+    window.open(stripeUrl, "_blank");
+  }
+
+  // Event wiring
+  const fileInput = $("#fileInput");
+  const menuToggle = $("#menuToggle");
+  const mobileMenu = $("#mobileMenu");
+  const exportBtnMobile = $("#exportBtnMobile");
+  const browseBtn = $("#browseBtn");
+  const dropZone = $("#dropZone");
+  const analyzeBtn = $("#analyzeBtn");
+  const resetBtn = $("#resetBtn");
+  const exportBtn = $("#exportBtn");
+  const exportJSONBtn = $("#exportJSONBtn");
+  const downloadChecklistBtn = $("#downloadChecklistBtn");
+  const licenseInput = $("#licenseInput");
+  const applyLicenseBtn = $("#applyLicenseBtn");
+  const clearLicenseBtn = $("#clearLicenseBtn");
+  const checkoutBtn = $("#checkoutBtn");
+  const upgradeBtn = $("#upgradeBtn");
+  const toggleVendorLinksBtn = $("#toggleVendorLinksBtn");
+
+  // Show export buttons and monetization elements once results exist
+  const showExportsIfAny = () => {
+    if (results && results.length) {
+      $("#exportBtn")?.classList.remove("hidden");
+      $("#exportJSONBtn")?.classList.remove("hidden");
+      // Show AdSense after results
+      $("#adContainer")?.classList.remove("hidden");
+      // Show email capture after first analysis
+      $("#emailCaptureCard")?.classList.remove("hidden");
+      // Show Done-For-You if 3+ subscriptions found
+      if (results.length >= 3) {
+        $("#doneForYouCard")?.classList.remove("hidden");
+        updateSavingsEstimate();
+      }
+      // Show Amazon recommendations after analysis
+      $("#recommendationsCard")?.classList.remove("hidden");
+      // Initialize AdSense
+      if (window.adsbygoogle) {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      }
+    }
+  };
+
+  // Update savings estimate for Done-For-You service
+  const updateSavingsEstimate = () => {
+    const monthlySubscriptions = results.filter(r => r.frequency === "Monthly");
+    const annualSavings = monthlySubscriptions.reduce((sum, r) => sum + (r.avgAmount * 12), 0);
+    const currency = results[0]?.currency || "USD";
+    $("#savingsEstimate").textContent = `Potential Annual Savings: ${fmtCurrency(annualSavings, currency)}`;
+  };
+
+  browseBtn.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", async (e) => {
+    await handleFiles(Array.from(e.target.files));
+  });
+
+  dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.style.borderColor = "#6b8cff"; });
+  dropZone.addEventListener("dragleave", (e) => { dropZone.style.borderColor = "#2a3a6c"; });
+  dropZone.addEventListener("drop", async (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = "#2a3a6c";
+    const dropped = Array.from(e.dataTransfer.files || []);
+    await handleFiles(dropped);
+  });
+
+  resetBtn.addEventListener("click", () => {
+    files = [];
+    transactions = [];
+    results = [];
+    $("#resultsBody").innerHTML = "<tr id='placeholderRow'><td colspan='6' class='small'>No results yet. Upload CSVs and click Analyze.</td></tr>";
+    updateStats();
+    analyzeBtn.disabled = true;
+    exportBtn.disabled = true;
+    exportJSONBtn.disabled = true;
+    downloadChecklistBtn.disabled = true;
+    fileInput.value = "";
+  });
+
+  analyzeBtn.addEventListener("click", () => {
+    const minRepeats = Math.max(2, parseInt($("#minRepeats").value, 10) || 2);
+    const maxVarianceDays = Math.min(15, Math.max(1, parseInt($("#maxVarianceDays").value, 10) || 4));
+    const amountTolerancePct = Math.min(15, Math.max(0, parseFloat($("#amountTolerancePct").value) || 5));
+    const groups = clusterByMerchant(transactions);
+    results = detectRecurring(groups, { minRepeats, maxVarianceDays, amountTolerancePct });
+    renderResults(results);
+    updateStats();
+    showExportsIfAny();
+  });
+
+  exportBtn.addEventListener("click", exportResultsCSV);
+  exportBtnMobile?.addEventListener("click", exportResultsCSV);
+  upgradeBtn?.addEventListener("click", openCheckout);
+  checkoutBtn?.addEventListener("click", openCheckout);
+
+  applyLicenseBtn?.addEventListener("click", () => {
+    const lic = (licenseInput.value || "").trim();
+    if (!validateLicense(lic)) {
+      alert("Invalid license key. It should start with 'SK-'.");
+      return;
+    }
+    setLicense(lic);
+    setPro(true);
+    refreshProUI();
+    alert("Pro unlocked. Thank you!");
+  });
+  clearLicenseBtn?.addEventListener("click", () => {
+    setLicense("");
+    setPro(false);
+    refreshProUI();
+  });
+
+  toggleVendorLinksBtn?.addEventListener("click", () => {
+    const existing = document.querySelectorAll(".vendor-links");
+    if (existing.length) {
+      existing.forEach(n => n.remove());
+      toggleVendorLinksBtn.textContent = "Show Vendor Links";
+      return;
+    }
+    // Inject simple vendor links column note under table (scaffolding)
+    const div = document.createElement("div");
+    div.className = "vendor-links small";
+    div.style.marginTop = "8px";
+    div.innerHTML = "Vendor links (scaffolding): We will add verified cancel URLs for known merchants (e.g., Adobe, Netflix, Spotify).";
+    document.querySelector("#resultsTable")?.insertAdjacentElement("afterend", div);
+    toggleVendorLinksBtn.textContent = "Hide Vendor Links";
+  });
+  exportJSONBtn.addEventListener("click", exportResultsJSON);
+  downloadChecklistBtn.addEventListener("click", downloadChecklistPDF);
+
+  // Email capture handler
+  $("#getKitBtn")?.addEventListener("click", () => {
+    const email = $("#emailInput").value.trim();
+    if (!email || !email.includes("@")) {
+      alert("Please enter a valid email address");
+      return;
+    }
+    // In production, send to your email service (Mailchimp, ConvertKit, etc.)
+    // For now, just show success and hide the form
+    alert("🎉 Check your email! Your FREE Subscription Cancellation Kit is on the way.");
+    $("#emailCaptureCard").style.display = "none";
+    
+    // Track conversion
+    if (window.gtag) {
+      gtag('event', 'email_signup', {
+        'event_category': 'engagement',
+        'event_label': 'cancellation_kit'
+      });
+    }
+  });
+
+  // Done-For-You service handler
+  $("#doneForYouBtn")?.addEventListener("click", () => {
+    // Replace with your actual service URL
+    const serviceUrl = "https://buy.stripe.com/doneForYouServiceLink";
+    window.open(serviceUrl, "_blank");
+    
+    // Track conversion
+    if (window.gtag) {
+      gtag('event', 'service_click', {
+        'event_category': 'monetization',
+        'event_label': 'done_for_you',
+        'value': 49
+      });
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    if (btn.classList.contains("btn-cancel")) {
+      const merchant = decodeURIComponent(btn.getAttribute("data-merchant"));
+      const txt = buildChecklist(merchant);
+      const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `cancel-${merchant.replace(/\s+/g,"-")}.txt`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+    if (btn.classList.contains("btn-keep")) {
+      btn.textContent = "Kept ✓";
+      btn.disabled = true;
+    }
+  });
+
+  // Hamburger menu handler (mobile)
+  menuToggle?.addEventListener("click", () => {
+    const expanded = menuToggle.getAttribute("aria-expanded") === "true";
+    menuToggle.setAttribute("aria-expanded", String(!expanded));
+    mobileMenu.classList.toggle("hidden", expanded);
+    document.getElementById("mobileBackdrop").classList.toggle("active", !expanded);
+    document.body.classList.toggle("menu-open", !expanded);
+  });
+
+  // Close mobile menu when clicking backdrop
+  document.getElementById("mobileBackdrop")?.addEventListener("click", () => {
+    menuToggle.setAttribute("aria-expanded", "false");
+    mobileMenu.classList.add("hidden");
+    document.getElementById("mobileBackdrop").classList.remove("active");
+    document.body.classList.remove("menu-open");
+  });
+
+  // Keep mobile export button enabled state in sync
+  const syncExports = () => {
+    const hasResults = results && results.length > 0;
+    if (hasResults) {
+      exportBtn?.classList.remove("hidden");
+      exportBtn?.removeAttribute("disabled");
+      exportBtnMobile?.removeAttribute("disabled");
+    } else {
+      exportBtn?.setAttribute("disabled", "true");
+      exportBtnMobile?.setAttribute("disabled", "true");
+    }
+  };
+
+  // Initialize Pro UI on load
+  refreshProUI();
+  syncExports();
+
+  async function parseExcel(file) {
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data, { type: 'array' });
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+  }
+
+  async function parsePDF(file) {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+      const pages = pdfDoc.getPages();
+      let allText = '';
+      
+      // Simple text extraction - in practice you'd use pdf-parse or similar
+      for (const page of pages) {
+        const textContent = await page.getTextContent?.() || [];
+        const pageText = textContent.items?.map(item => item.str).join(' ') || '';
+        allText += pageText + '\n';
+      }
+      
+      // Try to extract transaction-like patterns from PDF text
+      const lines = allText.split('\n').filter(line => line.trim());
+      const transactionRows = [];
+      
+      for (const line of lines) {
+        // Look for patterns like: "DATE DESCRIPTION AMOUNT"
+        const match = line.match(/(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})\s+(.+?)\s+([\-\$£€]?\d+[\.,]\d{2})/);
+        if (match) {
+          transactionRows.push([match[1], match[2].trim(), match[3]]);
+        }
+      }
+      
+      if (transactionRows.length > 0) {
+        transactionRows.unshift(['Date', 'Description', 'Amount']); // Add header
+      }
+      
+      return transactionRows;
+    } catch (error) {
+      console.warn('PDF parsing failed:', error);
+      return [];
+    }
+  }
+
+  async function handleFiles(selected) {
+    if (!selected.length) return;
+    for (const f of selected) {
+      let rows = [];
+      
+      if (/\.csv$/i.test(f.name)) {
+        const text = await f.text();
+        rows = parseCSV(text);
+      } else if (/\.(xlsx|xls)$/i.test(f.name)) {
+        try {
+          rows = await parseExcel(f);
+        } catch (error) {
+          console.warn(`Excel parsing failed for ${f.name}:`, error);
+          continue;
+        }
+      } else if (/\.pdf$/i.test(f.name)) {
+        try {
+          rows = await parsePDF(f);
+        } catch (error) {
+          console.warn(`PDF parsing failed for ${f.name}:`, error);
+          continue;
+        }
+      } else {
+        continue; // Skip unsupported file types
+      }
+      
+      if (!rows.length) continue;
+      
+      const norm = normalizeRows(rows);
+      transactions = transactions.concat(norm);
+      files.push({ name: f.name, rows: rows.length, norm: norm.length });
+    }
+    analyzeBtn.disabled = transactions.length === 0;
+    updateStats();
+  }
+  </script>
+
+  <!-- Structured Data for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "SubKiller",
+    "description": "Free tool to analyze bank statements and detect hidden recurring subscriptions",
+    "url": "https://subkiller.alvento.app",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web Browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "GBP"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Alvento Ltd",
+      "url": "https://alvento.app"
+    },
+    "featureList": [
+      "Bank statement analysis",
+      "Subscription detection",
+      "CSV/Excel/PDF support",
+      "Privacy-first processing",
+      "Cancellation guidance"
+    ]
+  }
+  </script>
+</body>
+</html>
